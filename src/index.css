@@ -1,0 +1,266 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* Light Theme Variables (default) */
+  --background-color: #ffffff;
+  --text-color: #213547;
+  --card-bg: #ffffff;
+  --card-header-bg: #f8f9fa;
+  --card-border: #dee2e6;
+  --list-group-item-bg: #ffffff;
+  --list-group-item-border: rgba(0, 0, 0, 0.125);
+  --hr-color: rgba(0, 0, 0, 0.1);
+  --table-bg: #ffffff;
+  --table-striped-bg: #f2f2f2;
+  --table-hover-bg: #e9ecef;
+  --table-border: #dee2e6;
+  --button-bg: #f9f9f9;
+  --button-border: #ced4da;
+  --button-text: #212529;
+  --button-hover-bg: #e2e6ea;
+  --button-hover-border: #dae0e5;
+  --button-active-bg: #d3d7da;
+  --button-active-border: #c6cbcf;
+  --button-info-bg: #17a2b8;
+  --button-info-border: #17a2b8;
+  --button-info-text: #ffffff;
+  --button-danger-bg: #dc3545;
+  --button-danger-border: #dc3545;
+  --button-danger-text: #ffffff;
+  --button-success-bg: #28a745;
+  --button-success-border: #28a745;
+  --button-success-text: #ffffff;
+  --button-primary-bg: #007bff;
+  --button-primary-border: #007bff;
+  --button-primary-text: #ffffff;
+  --modal-content-bg: #ffffff;
+  --modal-header-bg: #f8f9fa;
+  --modal-header-border: #dee2e6;
+  --modal-body-bg: #ffffff;
+  --modal-footer-bg: #f8f9fa;
+  --modal-footer-border: #dee2e6;
+}
+
+body.dark-theme {
+  /* Dark Theme Variables */
+  --background-color: #242424;
+  --text-color: rgba(255, 255, 255, 0.87);
+  --card-bg: #343a40; /* Darker card background */
+  --card-header-bg: #212529; /* Even darker header */
+  --card-border: #495057;
+  --list-group-item-bg: #343a40;
+  --list-group-item-border: rgba(255, 255, 255, 0.125);
+  --hr-color: rgba(255, 255, 255, 0.1);
+  --table-bg: #343a40;
+  --table-striped-bg: #2c3034;
+  --table-hover-bg: #3b4147;
+  --table-border: #495057;
+  --button-bg: #495057;
+  --button-border: #6c757d;
+  --button-text: #ffffff;
+  --button-hover-bg: #5a6268;
+  --button-hover-border: #545b62;
+  --button-active-bg: #4e555b;
+  --button-active-border: #464e55;
+  --button-info-bg: #117a8b;
+  --button-info-border: #117a8b;
+  --button-info-text: #ffffff;
+  --button-danger-bg: #bd2130;
+  --button-danger-border: #bd2130;
+  --button-danger-text: #ffffff;
+  --button-success-bg: #1e7e34;
+  --button-success-border: #1e7e34;
+  --button-success-text: #ffffff;
+  --button-primary-bg: #0056b3;
+  --button-primary-border: #0056b3;
+  --button-primary-text: #ffffff;
+  --modal-content-bg: #343a40;
+  --modal-header-bg: #212529;
+  --modal-header-border: #495057;
+  --modal-body-bg: #343a40;
+  --modal-footer-bg: #212529;
+  --modal-footer-border: #495057;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+
+  background-color: var(--background-color);
+  color: var(--text-color);
+  transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
+}
+
+/* Ensure all text elements inherit theme color */
+body, body * {
+  color: var(--text-color);
+}
+
+/* Apply theme variables to specific elements */
+.card {
+  background-color: var(--card-bg);
+  border-color: var(--card-border);
+  color: var(--text-color);
+}
+.card-header {
+  background-color: var(--card-header-bg);
+  border-color: var(--card-border);
+  color: var(--text-color);
+}
+.list-group-item {
+  background-color: var(--list-group-item-bg);
+  border-color: var(--list-group-item-border);
+  color: var(--text-color);
+}
+.form-label { /* New style for form labels */
+  color: var(--text-color);
+}
+hr {
+  border-top: 1px solid var(--hr-color);
+}
+.table {
+  --bs-table-bg: var(--table-bg);
+  --bs-table-striped-bg: var(--table-striped-bg);
+  --bs-table-hover-bg: var(--table-hover-bg);
+  --bs-table-border-color: var(--table-border);
+  color: var(--text-color); /* This should apply to table text */
+}
+.table th, .table td {
+  color: var(--text-color);
+}
+/* Apply to modal elements */
+.modal-content {
+  background-color: var(--modal-content-bg);
+  color: var(--text-color); /* Ensure text is theme-aware */
+}
+.modal-header {
+  background-color: var(--modal-header-bg);
+  border-bottom-color: var(--modal-header-border);
+}
+.modal-footer {
+  background-color: var(--modal-footer-bg);
+  border-top-color: var(--modal-footer-border);
+}
+/* Adjust button colors for theme */
+.btn-outline-primary {
+  --bs-btn-color: var(--button-primary-border);
+  --bs-btn-border-color: var(--button-primary-border);
+  --bs-btn-hover-color: var(--button-primary-text);
+  --bs-btn-hover-bg: var(--button-primary-bg);
+  --bs-btn-hover-border-color: var(--button-primary-bg);
+  --bs-btn-active-color: var(--button-primary-text);
+  --bs-btn-active-bg: var(--button-primary-bg);
+  --bs-btn-active-border-color: var(--button-primary-bg);
+}
+.btn-outline-secondary {
+  --bs-btn-color: var(--button-border);
+  --bs-btn-border-color: var(--button-border);
+  --bs-btn-hover-color: var(--button-text);
+  --bs-btn-hover-bg: var(--button-bg);
+  --bs-btn-hover-border-color: var(--button-border);
+  --bs-btn-active-color: var(--button-text);
+  --bs-btn-active-bg: var(--button-bg);
+  --bs-btn-active-border-color: var(--button-border);
+}
+.btn-info {
+  --bs-btn-color: var(--button-info-text);
+  --bs-btn-bg: var(--button-info-bg);
+  --bs-btn-border-color: var(--button-info-border);
+  --bs-btn-hover-color: var(--button-info-text);
+  --bs-btn-hover-bg: var(--button-info-bg);
+  --bs-btn-hover-border-color: var(--button-info-border);
+  --bs-btn-active-color: var(--button-info-text);
+  --bs-btn-active-bg: var(--button-info-bg);
+  --bs-btn-active-border-color: var(--button-info-border);
+}
+.btn-danger {
+  --bs-btn-color: var(--button-danger-text);
+  --bs-btn-bg: var(--button-danger-bg);
+  --bs-btn-border-color: var(--button-danger-border);
+  --bs-btn-hover-color: var(--button-danger-text);
+  --bs-btn-hover-bg: var(--button-danger-bg);
+  --bs-btn-hover-border-color: var(--button-danger-border);
+  --bs-btn-active-color: var(--button-danger-text);
+  --bs-btn-active-bg: var(--button-danger-bg);
+  --bs-btn-active-border-color: var(--button-danger-border);
+}
+.btn-success {
+  --bs-btn-color: var(--button-success-text);
+  --bs-btn-bg: var(--button-success-bg);
+  --bs-btn-border-color: var(--button-success-border);
+  --bs-btn-hover-color: var(--button-success-text);
+  --bs-btn-hover-bg: var(--button-success-bg);
+  --bs-btn-hover-border-color: var(--button-success-border);
+  --bs-btn-active-color: var(--button-success-text);
+  --bs-btn-active-bg: var(--button-success-bg);
+  --bs-btn-active-border-color: var(--button-success-border);
+}
+.btn-primary {
+  --bs-btn-color: var(--button-primary-text);
+  --bs-btn-bg: var(--button-primary-bg);
+  --bs-btn-border-color: var(--button-primary-border);
+  --bs-btn-hover-color: var(--button-primary-text);
+  --bs-btn-hover-bg: var(--button-primary-bg);
+  --bs-btn-hover-border-color: var(--button-primary-border);
+  --bs-btn-active-color: var(--button-primary-text);
+  --bs-btn-active-bg: var(--button-primary-bg);
+  --bs-btn-active-border-color: var(--button-primary-border);
+}
+
+/* Original styles that might need adjustment or removal */
+a {
+  font-weight: 500;
+  color: var(--text-color); /* Use theme variable */
+  text-decoration: inherit;
+}
+a:hover {
+  color: var(--text-color); /* Use theme variable */
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  color: var(--text-color); /* Use theme variable */
+}
+
+/* Remove or adjust button styles that conflict with Bootstrap */
+button {
+  /* These styles are largely overridden by Bootstrap's .btn classes */
+  /* Keeping them here might cause unexpected behavior or be redundant */
+  /* Consider removing if Bootstrap's styling is sufficient */
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  /* background-color: #1a1a1a; */ /* Let Bootstrap handle this */
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  /* border-color: #646cff; */ /* Let Bootstrap handle this */
+}
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Remove prefers-color-scheme media query as theme is now controlled by JS */
+/* @media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+  a:hover {
+    color: #747bff;
+  }
+  button {
+    background-color: #f9f9f9;
+  }
+} */
