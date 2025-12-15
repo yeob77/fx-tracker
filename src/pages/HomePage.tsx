@@ -220,7 +220,7 @@ const HomePage = () => {
         <Col>
           <h1 className="mb-0">전체 요약</h1>
         </Col>
-        <Col xs="auto">
+        <Col xs={12} md="auto" className="d-grid gap-2 d-md-block">
           <Button variant="outline-primary" onClick={handleExportData} className="me-2">데이터 내보내기</Button>
           <label htmlFor="import-file" className="btn btn-outline-secondary mb-0 me-2">
             데이터 가져오기
