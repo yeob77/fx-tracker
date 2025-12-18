@@ -1,6 +1,7 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { useRef } from 'react';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
-import { Card, ListGroup, Badge, Row, Col, Button } from 'react-bootstrap'; // Import Button
+import { Card, ListGroup, Badge, Row, Col, Button, Dropdown } from 'react-bootstrap'; // Import Button
 
 // Chart imports
 import {
@@ -202,6 +203,12 @@ const HomePage = () => {
     reader.readAsText(file);
   };
 
+  const importFileRef = useRef<HTMLInputElement>(null);
+
+  const handleImportClick = () => {
+    importFileRef.current?.click();
+  };
+
   const handleResetApp = () => {
     if (window.confirm('정말로 모든 데이터를 삭제하고 앱을 초기화하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
       localStorage.removeItem('usdLots');
@@ -220,19 +227,27 @@ const HomePage = () => {
         <Col>
           <h1 className="mb-0">전체 요약</h1>
         </Col>
-        <Col xs={12} md="auto" className="d-grid gap-2 d-md-block">
-          <Button variant="outline-primary" onClick={handleExportData} className="me-2">데이터 내보내기</Button>
-          <label htmlFor="import-file" className="btn btn-outline-secondary mb-0 me-2">
-            데이터 가져오기
-          </label>
+        <Col xs="auto">
+          <Dropdown>
+            <Dropdown.Toggle variant="outline-secondary" id="dropdown-data-management">
+              데이터 관리
+            </Dropdown.Toggle>
+
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={handleExportData}>데이터 내보내기</Dropdown.Item>
+              <Dropdown.Item onClick={handleImportClick}>데이터 가져오기</Dropdown.Item>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={handleResetApp} className="text-danger">앱 초기화</Dropdown.Item>
+            </Dropdown.Menu>
+          </Dropdown>
           <input
             type="file"
             id="import-file"
+            ref={importFileRef}
             accept=".json"
             style={{ display: 'none' }}
             onChange={handleImportData}
           />
-          <Button variant="outline-danger" onClick={handleResetApp}>앱 초기화</Button>
         </Col>
       </Row>
 
