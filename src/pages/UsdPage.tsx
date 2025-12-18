@@ -288,16 +288,16 @@ const UsdPage = () => {
       {holdings.length === 0 ? (
         <p>보유 중인 달러가 없습니다.</p>
       ) : (
-        <Table striped bordered hover responsive size="sm">
+        <Table className="holdings-table" striped bordered hover responsive size="sm">
           <thead>
             <tr>
-              <th className="fs-6" onClick={() => handleSort('purchaseDate', 'holdings')} style={{ cursor: 'pointer' }}>매수일 {sortColumnHoldings === 'purchaseDate' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
-              <th className="fs-6" onClick={() => handleSort('purchasePrice', 'holdings')} style={{ cursor: 'pointer' }}>매수환율 {sortColumnHoldings === 'purchasePrice' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
-              <th className="fs-6" onClick={() => handleSort('initialQuantity', 'holdings')} style={{ cursor: 'pointer' }}>최초수량 {sortColumnHoldings === 'initialQuantity' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
-              <th className="fs-6" onClick={() => handleSort('remainingQuantity', 'holdings')} style={{ cursor: 'pointer' }}>남은수량 {sortColumnHoldings === 'remainingQuantity' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
-              <th className="fs-6" onClick={() => handleSort('fee', 'holdings')} style={{ cursor: 'pointer' }}>수수료 {sortColumnHoldings === 'fee' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
-              <th className="fs-6">메모</th>
-              <th className="fs-6">액션</th>
+              <th onClick={() => handleSort('purchaseDate', 'holdings')} style={{ cursor: 'pointer' }}>매수일 {sortColumnHoldings === 'purchaseDate' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
+              <th onClick={() => handleSort('purchasePrice', 'holdings')} style={{ cursor: 'pointer' }}>매수환율 {sortColumnHoldings === 'purchasePrice' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
+              <th onClick={() => handleSort('initialQuantity', 'holdings')} style={{ cursor: 'pointer' }}>최초수량 {sortColumnHoldings === 'initialQuantity' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
+              <th onClick={() => handleSort('remainingQuantity', 'holdings')} style={{ cursor: 'pointer' }}>남은수량 {sortColumnHoldings === 'remainingQuantity' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
+              <th onClick={() => handleSort('fee', 'holdings')} style={{ cursor: 'pointer' }}>수수료 {sortColumnHoldings === 'fee' && (sortDirectionHoldings === 'asc' ? '▲' : '▼')}</th>
+              <th>메모</th>
+              <th>액션</th>
             </tr>
           </thead>
           <tbody>
@@ -308,7 +308,6 @@ const UsdPage = () => {
                 <td>{lot.initialQuantity.toLocaleString()} USD</td>
                 <td><strong>{lot.remainingQuantity.toLocaleString()} USD</strong></td>
                 <td>{lot.fee?.toLocaleString() || 0} KRW</td>
-                <td>{lot.memo}</td>
                 <td>
                   <Button variant="info" size="sm" onClick={() => handleEditPurchase(lot)}>수정</Button>
                   <Button variant="danger" size="sm" onClick={() => handleDeletePurchase(lot)} className="ms-2">삭제</Button>

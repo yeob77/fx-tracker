@@ -327,3 +327,10 @@ body.dark-theme .react-datepicker__input-container input {
   color: var(--text-color);
   border-color: var(--card-border);
 }
+
+@media (max-width: 767.98px) { /* For small screens */
+  .holdings-table th {
+    font-size: 0.7rem; /* Even smaller font size */
+    padding: 0.3rem; /* Reduce padding slightly for compactness */
+  }
+}
