@@ -20,64 +20,97 @@ interface PurchaseModalProps {
 const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, editingRecord }: PurchaseModalProps) => {
   const [formData, setFormData] = useState({
     currency: currencyCode,
-    purchaseDate: new Date().toISOString().split('T')[0], // Default to today
-    purchasePrice: 0,
-    initialQuantity: 0,
+    purchaseDate: new Date().toISOString().split('T')[0],
+    purchasePrice: '',
+    initialQuantity: '',
+    totalKrwAmount: '', // New field for total KRW amount
     memo: '',
-    fee: 0, // New field for fee
+    fee: '',
   });
 
-  const [calculatedKrwAmount, setCalculatedKrwAmount] = useState(0); // New state for calculated KRW amount
+  const [calculationMode, setCalculationMode] = useState<'quantity' | 'krw'>('quantity'); // 'quantity' means input quantity, calculate KRW; 'krw' means input KRW, calculate quantity
 
   // Effect to pre-fill form when editingRecord changes
   useEffect(() => {
     if (show && editingRecord) {
+      const calculatedTotalKrw = Number(editingRecord.purchasePrice) * Number(editingRecord.initialQuantity);
       setFormData({
         currency: editingRecord.currency,
         purchaseDate: editingRecord.purchaseDate,
-        purchasePrice: editingRecord.purchasePrice,
-        initialQuantity: editingRecord.initialQuantity,
+        purchasePrice: String(editingRecord.purchasePrice),
+        initialQuantity: String(editingRecord.initialQuantity),
+        totalKrwAmount: String(calculatedTotalKrw), // Calculate and set
         memo: editingRecord.memo || '',
-        fee: editingRecord.fee || 0,
+        fee: String(editingRecord.fee || 0),
       });
     } else if (show && !editingRecord) {
-      // Reset form for new purchase
       setFormData({
         currency: currencyCode,
         purchaseDate: new Date().toISOString().split('T')[0],
-        purchasePrice: 0,
-        initialQuantity: 0,
+        purchasePrice: '',
+        initialQuantity: '',
+        totalKrwAmount: '', // Reset to empty string
         memo: '',
-        fee: 0,
+        fee: '',
       });
     }
-  }, [show, editingRecord, currencyCode]); // Add currencyCode to dependencies
+    setCalculationMode('quantity'); // Reset mode when modal opens
+  }, [show, editingRecord, currencyCode]);
 
-  // Effect to calculate KRW amount
-  useEffect(() => {
-    const { purchasePrice, initialQuantity } = formData;
-    const krw = Number(purchasePrice) * Number(initialQuantity);
-    setCalculatedKrwAmount(krw);
-  }, [formData.purchasePrice, formData.initialQuantity]);
+  // No longer need a separate useEffect for calculatedKrwAmount as it's handled in handleChange
+  // const [calculatedKrwAmount, setCalculatedKrwAmount] = useState(0);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData(prev => {
+      const newFormData = { ...prev, [name]: value };
+
+      const numPurchasePrice = Number(newFormData.purchasePrice) || 0;
+      let numInitialQuantity = Number(newFormData.initialQuantity) || 0;
+      let numTotalKrwAmount = Number(newFormData.totalKrwAmount) || 0;
+
+      if (name === 'purchasePrice' || name === 'initialQuantity') {
+        if (calculationMode === 'quantity') { // User is inputting quantity, calculate KRW
+          newFormData.totalKrwAmount = String(numPurchasePrice * numInitialQuantity);
+        } else { // User is inputting KRW, calculate quantity
+          if (numPurchasePrice > 0) {
+            newFormData.initialQuantity = String(numTotalKrwAmount / numPurchasePrice);
+          } else {
+            newFormData.initialQuantity = '';
+          }
+        }
+      } else if (name === 'totalKrwAmount') {
+        if (calculationMode === 'krw') { // User is inputting KRW, calculate quantity
+          if (numPurchasePrice > 0) {
+            newFormData.initialQuantity = String(numTotalKrwAmount / numPurchasePrice);
+          } else {
+            newFormData.initialQuantity = '';
+          }
+        } else { // This case should not happen if mode is 'quantity' and totalKrwAmount is changed directly
+          // But if it does, recalculate totalKrwAmount based on price and quantity
+          newFormData.totalKrwAmount = String(numPurchasePrice * numInitialQuantity);
+        }
+      }
+      return newFormData;
+    });
   };
 
   const handleSave = () => {
-    // Basic validation
-    if (formData.purchasePrice <= 0 || formData.initialQuantity <= 0) {
+    const numPurchasePrice = Number(formData.purchasePrice);
+    const numInitialQuantity = Number(formData.initialQuantity);
+    const numFee = Number(formData.fee);
+
+    if (numPurchasePrice <= 0 || numInitialQuantity <= 0) {
       alert('환율과 수량은 0보다 커야 합니다.');
       return;
     }
     onSave({
-      id: editingRecord?.id, // Pass id if editing
+      id: editingRecord?.id,
       ...formData,
       currency: formData.currency as Currency,
-      purchasePrice: Number(formData.purchasePrice),
-      initialQuantity: Number(formData.initialQuantity),
-      fee: Number(formData.fee), // Include fee
+      purchasePrice: numPurchasePrice,
+      initialQuantity: numInitialQuantity,
+      fee: numFee,
     });
   };
 
@@ -97,12 +130,38 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
               className="form-control" // Apply Bootstrap styling
             />
           </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>계산 방식</Form.Label>
+            <div>
+              <Form.Check
+                inline
+                type="radio"
+                label="수량 입력 (총 한화 계산)"
+                name="calculationMode"
+                id="mode-quantity"
+                checked={calculationMode === 'quantity'}
+                onChange={() => setCalculationMode('quantity')}
+              />
+              <Form.Check
+                inline
+                type="radio"
+                label="총 한화 입력 (수량 계산)"
+                name="calculationMode"
+                id="mode-krw"
+                checked={calculationMode === 'krw'}
+                onChange={() => setCalculationMode('krw')}
+              />
+            </div>
+          </Form.Group>
+
           <Form.Group className="mb-3" controlId="purchasePrice">
             <Form.Label>환율 (1 {currencyCode} 당 KRW)</Form.Label>
             <Form.Control 
               type="number" 
               name="purchasePrice" 
               placeholder="예: 9.40"
+              value={formData.purchasePrice}
               onChange={handleChange}
             />
           </Form.Group>
@@ -112,15 +171,20 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
               type="number" 
               name="initialQuantity" 
               placeholder="예: 10000"
+              value={formData.initialQuantity}
               onChange={handleChange}
+              disabled={calculationMode === 'krw'} // Disable if calculating quantity
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>총 한화 금액 (자동 계산)</Form.Label>
             <Form.Control
-              type="text"
-              readOnly
-              value={calculatedKrwAmount.toLocaleString()}
+              type="number" // Changed to number for direct input
+              name="totalKrwAmount"
+              placeholder="자동 계산"
+              value={formData.totalKrwAmount}
+              onChange={handleChange}
+              disabled={calculationMode === 'quantity'} // Disable if calculating KRW
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="fee">
