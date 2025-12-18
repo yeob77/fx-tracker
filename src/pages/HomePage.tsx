@@ -227,7 +227,7 @@ const HomePage = () => {
     <div>
       <Row className="align-items-center mb-4">
         <Col>
-          <h1 className="mb-0">전체 요약</h1>
+          <h1 className="mb-0 fs-4 fs-md-2">전체 요약</h1>
         </Col>
         <Col xs="auto">
           <Dropdown>
