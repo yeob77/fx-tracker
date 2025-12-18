@@ -233,7 +233,7 @@ const HomePage = () => {
               데이터 관리
             </Dropdown.Toggle>
 
-            <Dropdown.Menu>
+            <Dropdown.Menu data-bs-theme="dark">
               <Dropdown.Item onClick={handleExportData}>데이터 내보내기</Dropdown.Item>
               <Dropdown.Item onClick={handleImportClick}>데이터 가져오기</Dropdown.Item>
               <Dropdown.Divider />
