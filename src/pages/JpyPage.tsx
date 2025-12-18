@@ -310,8 +310,8 @@ const JpyPage = () => {
                 <td>{lot.fee?.toLocaleString() || 0} KRW</td>
                 <td>{lot.memo}</td>
                 <td>
-                  <Button variant="info" size="sm" onClick={() => handleEditPurchase(lot)}>수정</Button>
-                  <Button variant="danger" size="sm" onClick={() => handleDeletePurchase(lot)} className="ms-2">삭제</Button>
+                  <Button variant="info" size="sm" onClick={() => handleEditPurchase(lot)} aria-label="수정">✏️</Button>
+                  <Button variant="danger" size="sm" onClick={() => handleDeletePurchase(lot)} className="ms-2" aria-label="삭제">🗑️</Button>
                 </td>
               </tr>
             ))}
