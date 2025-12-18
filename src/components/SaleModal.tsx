@@ -26,26 +26,26 @@ interface SaleModalProps {
 
 const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currencyCode, editingRecord }: SaleModalProps) => {
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
-  const [salePrice, setSalePrice] = useState(0);
-  const [quantity, setQuantity] = useState(0);
+  const [salePrice, setSalePrice] = useState<string>(''); // Changed to string
+  const [quantity, setQuantity] = useState<string>(''); // Changed to string
   const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
-  const [fee, setFee] = useState(0); // New state for fee
+  const [fee, setFee] = useState<string>(''); // Changed to string
 
   // Reset form or pre-fill when modal is opened/closed or editingRecord changes
   useEffect(() => {
     if (show) {
       if (editingRecord) {
         setSaleDate(editingRecord.saleDate);
-        setSalePrice(editingRecord.salePrice);
-        setQuantity(editingRecord.quantity);
+        setSalePrice(String(editingRecord.salePrice)); // Convert to string
+        setQuantity(String(editingRecord.quantity)); // Convert to string
         setSelectedLotId(editingRecord.purchaseLotId);
-        setFee(editingRecord.fee || 0); // Pre-fill fee
+        setFee(String(editingRecord.fee || 0)); // Convert to string
       } else {
         setSaleDate(new Date().toISOString().split('T')[0]);
-        setSalePrice(0);
-        setQuantity(0);
+        setSalePrice(''); // Reset to empty string
+        setQuantity(''); // Reset to empty string
         setSelectedLotId(null);
-        setFee(0); // Reset fee
+        setFee(''); // Reset to empty string
       }
     }
   }, [show, editingRecord]);
@@ -57,11 +57,16 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
       alert('판매할 매수 묶음을 선택해주세요.');
       return;
     }
-    if (salePrice <= 0 || quantity <= 0) {
+    // Convert string inputs to numbers for validation and saving
+    const numSalePrice = Number(salePrice);
+    const numQuantity = Number(quantity);
+    const numFee = Number(fee);
+
+    if (numSalePrice <= 0 || numQuantity <= 0) {
       alert('환율과 수량은 0보다 커야 합니다.');
       return;
     }
-    if (quantity > selectedLot.remainingQuantity + (editingRecord && editingRecord.purchaseLotId === selectedLotId ? editingRecord.quantity : 0)) {
+    if (numQuantity > selectedLot.remainingQuantity + (editingRecord && editingRecord.purchaseLotId === selectedLotId ? editingRecord.quantity : 0)) {
       alert(`판매 수량은 남은 수량(${selectedLot.remainingQuantity.toLocaleString()} ${currencyCode})보다 클 수 없습니다.`);
       return;
     }
@@ -69,10 +74,10 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
     onSave({
       id: editingRecord?.id, // Pass id if editing
       saleDate,
-      salePrice: Number(salePrice),
-      quantity: Number(quantity),
+      salePrice: numSalePrice,
+      quantity: numQuantity,
       purchaseLotId: selectedLotId,
-      fee: Number(fee), // Include fee
+      fee: numFee, // Include fee
     });
   };
 
@@ -95,11 +100,11 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>매도 환율 (1 {currencyCode} 당 KRW)</Form.Label>
-            <Form.Control type="number" placeholder="예: 9.55" value={salePrice} onChange={e => setSalePrice(Number(e.target.value))} />
+            <Form.Control type="number" placeholder="예: 9.55" value={salePrice} onChange={e => setSalePrice(e.target.value)} />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>매도 수량 ({currencyCode})</Form.Label>
-            <Form.Control type="number" placeholder="판매할 수량" value={quantity} onChange={e => setQuantity(Number(e.target.value))} />
+            <Form.Control type="number" placeholder="판매할 수량" value={quantity} onChange={e => setQuantity(e.target.value)} />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>수수료 (KRW, 선택)</Form.Label>
@@ -107,7 +112,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
               type="number" 
               placeholder="예: 5000"
               value={fee}
-              onChange={e => setFee(Number(e.target.value))}
+              onChange={e => setFee(e.target.value)}
             />
           </Form.Group>
         </Form>
