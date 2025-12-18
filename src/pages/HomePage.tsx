@@ -1,7 +1,7 @@
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useRef } from 'react';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
-import { Card, ListGroup, Badge, Row, Col, Button, Dropdown } from 'react-bootstrap'; // Import Button
+import { Card, ListGroup, Badge, Row, Col, Dropdown } from 'react-bootstrap'; // Import Button
 
 // Chart imports
 import {
