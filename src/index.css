@@ -264,3 +264,66 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 } */
+
+/* react-datepicker dark theme styles */
+body.dark-theme .react-datepicker {
+  background-color: var(--card-bg); /* Use a dark background from theme */
+  border-color: var(--card-border); /* Use a dark border from theme */
+  color: var(--text-color); /* Use light text from theme */
+}
+
+body.dark-theme .react-datepicker__header {
+  background-color: var(--card-header-bg); /* Darker header */
+  border-color: var(--card-border);
+}
+
+body.dark-theme .react-datepicker__current-month,
+body.dark-theme .react-datepicker__day-name {
+  color: var(--text-color);
+}
+
+body.dark-theme .react-datepicker__day {
+  color: var(--text-color);
+}
+
+body.dark-theme .react-datepicker__day--outside-month {
+  color: var(--text-color); /* Lighter gray for outside month */
+  opacity: 0.5;
+}
+
+body.dark-theme .react-datepicker__day--selected,
+body.dark-theme .react-datepicker__day--in-selecting-range,
+body.dark-theme .react-datepicker__day--in-range {
+  background-color: var(--button-primary-bg); /* Use primary button color for selection */
+  color: var(--button-primary-text); /* White text for selection */
+}
+
+body.dark-theme .react-datepicker__day--keyboard-selected {
+  background-color: var(--button-primary-bg); /* Use primary button color for keyboard selection */
+  color: var(--button-primary-text);
+}
+
+body.dark-theme .react-datepicker__day:hover {
+  background-color: var(--button-hover-bg); /* Use button hover bg */
+  color: var(--button-text);
+}
+
+body.dark-theme .react-datepicker__navigation-icon::before {
+  border-color: var(--text-color); /* Adjust navigation arrows */
+}
+
+body.dark-theme .react-datepicker__navigation--previous,
+body.dark-theme .react-datepicker__navigation--next {
+  color: var(--text-color);
+}
+
+body.dark-theme .react-datepicker__navigation:hover *::before {
+  border-color: var(--text-color);
+}
+
+/* Adjust input field in dark mode */
+body.dark-theme .react-datepicker__input-container input {
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  border-color: var(--card-border);
+}
