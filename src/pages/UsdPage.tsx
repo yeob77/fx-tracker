@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Button, Table, Badge, Form, Row, Col } from 'react-bootstrap';
+import { Button, Table, Badge, Form, Row, Col, OverlayTrigger, Tooltip } from 'react-bootstrap';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
 import PurchaseModal, { type PurchaseData } from '../components/PurchaseModal';
@@ -308,7 +308,14 @@ const UsdPage = () => {
                 <td>{lot.initialQuantity.toLocaleString()} USD</td>
                 <td><strong>{lot.remainingQuantity.toLocaleString()} USD</strong></td>
                 <td>{lot.fee?.toLocaleString() || 0} KRW</td>
-                <td className="text-wrap">{lot.memo}</td>
+                <td className="text-truncate" style={{ maxWidth: '100px' }}>
+                  <OverlayTrigger
+                    placement="top"
+                    overlay={<Tooltip id={`tooltip-memo-${lot.id}`}>{lot.memo}</Tooltip>}
+                  >
+                    <span>{lot.memo}</span>
+                  </OverlayTrigger>
+                </td>
                 <td className="d-flex gap-1 text-nowrap">
                   <Button variant="info" size="sm" onClick={() => handleEditPurchase(lot)} aria-label="수정">✏️</Button>
                   <Button variant="danger" size="sm" onClick={() => handleDeletePurchase(lot)} className="ms-2" aria-label="삭제">🗑️</Button>
