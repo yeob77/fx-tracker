@@ -1,3 +1,4 @@
+import { useTheme } from '../contexts/ThemeContext';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useRef } from 'react';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
@@ -28,6 +29,7 @@ ChartJS.register(
 );
 
 const HomePage = () => {
+  const { theme } = useTheme();
   const [usdLots] = useLocalStorage<PurchaseLot[]>('usdLots', []);
   const [usdSales] = useLocalStorage<SaleRecord[]>('usdSales', []);
   const [jpyLots] = useLocalStorage<PurchaseLot[]>('jpyLots', []);
@@ -233,7 +235,7 @@ const HomePage = () => {
               데이터 관리
             </Dropdown.Toggle>
 
-            <Dropdown.Menu data-bs-theme="dark">
+            <Dropdown.Menu data-bs-theme={theme}>
               <Dropdown.Item onClick={handleExportData}>데이터 내보내기</Dropdown.Item>
               <Dropdown.Item onClick={handleImportClick}>데이터 가져오기</Dropdown.Item>
               <Dropdown.Divider />
