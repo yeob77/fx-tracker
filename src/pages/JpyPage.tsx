@@ -2,13 +2,13 @@ import { useState, useMemo } from 'react';
 import { Button, Table, Badge, Form, Row, Col } from 'react-bootstrap';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
-import PurchaseModal from '../components/PurchaseModal';
+import PurchaseModal, { type PurchaseData } from '../components/PurchaseModal';
 import SaleModal, { type SaleData } from '../components/SaleModal';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-type PurchaseData = Omit<PurchaseLot, 'id' | 'remainingQuantity'> & { fee: number };
+
 
 const JpyPage = () => {
   const [jpyLots, setJpyLots] = useLocalStorage<PurchaseLot[]>('jpyLots', []);
@@ -121,8 +121,6 @@ const JpyPage = () => {
       const originalSale = jpySales.find(sale => sale.id === data.id);
       if (!originalSale) return;
 
-      const quantityDifference = data.quantity - originalSale.quantity;
-
       // Adjust the remainingQuantity of the original purchase lot
       updatedJpyLots = updatedJpyLots.map(lot => {
         if (lot.id === originalSale.purchaseLotId) {
@@ -168,6 +166,28 @@ const JpyPage = () => {
   const handleEditSale = (sale: SaleRecord) => {
     setEditingSaleRecord(sale);
     setShowSaleModal(true);
+  };
+
+  const handleDeleteSale = (saleToDelete: SaleRecord) => {
+    if (!window.confirm('정말로 이 매도 기록을 삭제하시겠습니까?')) {
+      return;
+    }
+
+    // Find the purchase lot associated with this sale
+    const purchaseLot = jpyLots.find(lot => lot.id === saleToDelete.purchaseLotId);
+    if (purchaseLot) {
+      // Add the sold quantity back to the purchase lot's remaining quantity
+      const updatedLots = jpyLots.map(lot =>
+        lot.id === saleToDelete.purchaseLotId
+          ? { ...lot, remainingQuantity: lot.remainingQuantity + saleToDelete.quantity }
+          : lot
+      );
+      setJpyLots(updatedLots);
+    }
+
+    // Remove the sale record
+    const updatedSales = jpySales.filter(sale => sale.id !== saleToDelete.id);
+    setJpySales(updatedSales);
   };
 
   const handleCloseSaleModal = () => {

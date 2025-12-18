@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
-import type { PurchaseLot } from '../types/definitions';
+import type { PurchaseLot, Currency } from '../types/definitions';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
 // Omit 'id' and 'remainingQuantity' as they will be set in the parent component
-type PurchaseData = Omit<PurchaseLot, 'id' | 'remainingQuantity'> & { id?: string; fee: number };
+export type PurchaseData = Omit<PurchaseLot, 'id' | 'remainingQuantity'> & { id?: string; fee: number };
 
 interface PurchaseModalProps {
   show: boolean;
@@ -74,6 +74,7 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
     onSave({
       id: editingRecord?.id, // Pass id if editing
       ...formData,
+      currency: formData.currency as Currency,
       purchasePrice: Number(formData.purchasePrice),
       initialQuantity: Number(formData.initialQuantity),
       fee: Number(formData.fee), // Include fee
@@ -91,7 +92,7 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
             <Form.Label>매수일</Form.Label>
             <DatePicker
               selected={new Date(formData.purchaseDate)} // Convert string to Date object
-              onChange={(date: Date) => setFormData(prev => ({ ...prev, purchaseDate: date.toISOString().split('T')[0] }))}
+              onChange={(date: Date | null) => date && setFormData(prev => ({ ...prev, purchaseDate: date.toISOString().split('T')[0] }))}
               dateFormat="yyyy-MM-dd"
               className="form-control" // Apply Bootstrap styling
             />

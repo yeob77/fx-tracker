@@ -2,13 +2,13 @@ import { useState, useMemo } from 'react';
 import { Button, Table, Badge, Form, Row, Col } from 'react-bootstrap';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
-import PurchaseModal from '../components/PurchaseModal';
+import PurchaseModal, { type PurchaseData } from '../components/PurchaseModal';
 import SaleModal, { type SaleData } from '../components/SaleModal';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
-type PurchaseData = Omit<PurchaseLot, 'id' | 'remainingQuantity'> & { fee: number };
+
 
 const UsdPage = () => {
   const [usdLots, setUsdLots] = useLocalStorage<PurchaseLot[]>('usdLots', []);
@@ -121,8 +121,6 @@ const UsdPage = () => {
       const originalSale = usdSales.find(sale => sale.id === data.id);
       if (!originalSale) return;
 
-      const quantityDifference = data.quantity - originalSale.quantity;
-
       // Adjust the remainingQuantity of the original purchase lot
       updatedUsdLots = updatedUsdLots.map(lot => {
         if (lot.id === originalSale.purchaseLotId) {
@@ -168,6 +166,28 @@ const UsdPage = () => {
   const handleEditSale = (sale: SaleRecord) => {
     setEditingSaleRecord(sale);
     setShowSaleModal(true);
+  };
+
+  const handleDeleteSale = (saleToDelete: SaleRecord) => {
+    if (!window.confirm('정말로 이 매도 기록을 삭제하시겠습니까?')) {
+      return;
+    }
+
+    // Find the purchase lot associated with this sale
+    const purchaseLot = usdLots.find(lot => lot.id === saleToDelete.purchaseLotId);
+    if (purchaseLot) {
+      // Add the sold quantity back to the purchase lot's remaining quantity
+      const updatedLots = usdLots.map(lot =>
+        lot.id === saleToDelete.purchaseLotId
+          ? { ...lot, remainingQuantity: lot.remainingQuantity + saleToDelete.quantity }
+          : lot
+      );
+      setUsdLots(updatedLots);
+    }
+
+    // Remove the sale record
+    const updatedSales = usdSales.filter(sale => sale.id !== saleToDelete.id);
+    setUsdSales(updatedSales);
   };
 
   const handleCloseSaleModal = () => {

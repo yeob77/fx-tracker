@@ -145,7 +145,7 @@ const HomePage = () => {
     },
     scales: {
       x: {
-        type: 'category', // Ensure x-axis is treated as categories (dates)
+        type: 'category' as const, // Ensure x-axis is treated as categories (dates)
         labels: allLabels,
       },
     },

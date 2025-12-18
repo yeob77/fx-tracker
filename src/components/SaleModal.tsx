@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Table } from 'react-bootstrap';
-import type { PurchaseLot } from '../types/definitions';
+import type { PurchaseLot, SaleRecord } from '../types/definitions';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -88,7 +88,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
             <Form.Label>매도일</Form.Label>
             <DatePicker
               selected={new Date(saleDate)} // Convert string to Date object
-              onChange={(date: Date) => setSaleDate(date.toISOString().split('T')[0])}
+              onChange={(date: Date | null) => date && setSaleDate(date.toISOString().split('T')[0])}
               dateFormat="yyyy-MM-dd"
               className="form-control" // Apply Bootstrap styling
             />
@@ -137,7 +137,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
                       id={`lot-${lot.id}`}
                       onChange={() => setSelectedLotId(lot.id)}
                       checked={selectedLotId === lot.id}
-                      disabled={editingRecord && editingRecord.purchaseLotId !== lot.id} // Disable other lots when editing
+                      disabled={(editingRecord && editingRecord.purchaseLotId !== lot.id) || false} // Disable other lots when editing
                     />
                   </td>
                   <td>{lot.purchaseDate}</td>
