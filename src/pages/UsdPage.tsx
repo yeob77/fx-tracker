@@ -308,7 +308,8 @@ const UsdPage = () => {
                 <td>{lot.initialQuantity.toLocaleString()} USD</td>
                 <td><strong>{lot.remainingQuantity.toLocaleString()} USD</strong></td>
                 <td>{lot.fee?.toLocaleString() || 0} KRW</td>
-                <td>
+                <td className="text-wrap">{lot.memo}</td>
+                <td className="d-flex gap-1 text-nowrap">
                   <Button variant="info" size="sm" onClick={() => handleEditPurchase(lot)} aria-label="수정">✏️</Button>
                   <Button variant="danger" size="sm" onClick={() => handleDeletePurchase(lot)} className="ms-2" aria-label="삭제">🗑️</Button>
                 </td>
