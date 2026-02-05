@@ -121,7 +121,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
             <Form.Label>매도일</Form.Label>
             <DatePicker
               selected={new Date(saleDate)} // Convert string to Date object
-              onChange={(date: Date | null) => date && setSaleDate(prev => date.toISOString().split('T')[0])}
+              onChange={(date: Date | null) => date && setSaleDate(() => date.toISOString().split('T')[0])}
               dateFormat="yyyy-MM-dd"
               className="form-control" // Apply Bootstrap styling
             />

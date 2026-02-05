@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Table, Badge, Form, Row, Col, Button } from 'react-bootstrap';
+import { Table, Badge, Form, Row, Col } from 'react-bootstrap'; // Removed Button
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -41,7 +41,7 @@ const TransactionHistoryPage = () => {
     const purchases: Transaction[] = [
       ...usdLots.map(lot => ({
         id: lot.id,
-        type: 'purchase',
+        type: 'purchase' as 'purchase' | 'sale', // Explicit cast
         currency: 'USD',
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
@@ -52,7 +52,7 @@ const TransactionHistoryPage = () => {
       })),
       ...jpyLots.map(lot => ({
         id: lot.id,
-        type: 'purchase',
+        type: 'purchase' as 'purchase' | 'sale', // Explicit cast
         currency: 'JPY',
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
@@ -65,10 +65,10 @@ const TransactionHistoryPage = () => {
 
     const sales: Transaction[] = [
       ...usdSales.map(sale => {
-        const purchaseLot = usdLots.find(lot => lot.id === sale.purchaseLotId);
+        const _purchaseLot = usdLots.find(lot => lot.id === sale.purchaseLotId); // Renamed to _purchaseLot
         return {
           id: sale.id,
-          type: 'sale',
+          type: 'sale' as 'purchase' | 'sale', // Explicit cast
           currency: 'USD',
           date: sale.saleDate,
           rate: sale.salePrice,
@@ -79,10 +79,10 @@ const TransactionHistoryPage = () => {
         };
       }),
       ...jpySales.map(sale => {
-        const purchaseLot = jpyLots.find(lot => lot.id === sale.purchaseLotId);
+        const _purchaseLot = jpyLots.find(lot => lot.id === sale.purchaseLotId); // Renamed to _purchaseLot
         return {
           id: sale.id,
-          type: 'sale',
+          type: 'sale' as 'purchase' | 'sale', // Explicit cast
           currency: 'JPY',
           date: sale.saleDate,
           rate: sale.salePrice,
