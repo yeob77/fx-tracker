@@ -42,7 +42,7 @@ const TransactionHistoryPage = () => {
       ...usdLots.map(lot => ({
         id: lot.id,
         type: 'purchase' as 'purchase' | 'sale', // Explicit cast
-        currency: 'USD',
+        currency: 'USD' as 'USD' | 'JPY', // Explicit cast
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
         quantity: lot.initialQuantity,
@@ -53,7 +53,7 @@ const TransactionHistoryPage = () => {
       ...jpyLots.map(lot => ({
         id: lot.id,
         type: 'purchase' as 'purchase' | 'sale', // Explicit cast
-        currency: 'JPY',
+        currency: 'JPY' as 'USD' | 'JPY', // Explicit cast
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
         quantity: lot.initialQuantity,
@@ -65,11 +65,11 @@ const TransactionHistoryPage = () => {
 
     const sales: Transaction[] = [
       ...usdSales.map(sale => {
-        const _purchaseLot = usdLots.find(lot => lot.id === sale.purchaseLotId); // Renamed to _purchaseLot
+        // const _purchaseLot = usdLots.find(lot => lot.id === sale.purchaseLotId); // Removed unused variable
         return {
           id: sale.id,
           type: 'sale' as 'purchase' | 'sale', // Explicit cast
-          currency: 'USD',
+          currency: 'USD' as 'USD' | 'JPY', // Explicit cast
           date: sale.saleDate,
           rate: sale.salePrice,
           quantity: sale.quantity,
@@ -79,11 +79,11 @@ const TransactionHistoryPage = () => {
         };
       }),
       ...jpySales.map(sale => {
-        const _purchaseLot = jpyLots.find(lot => lot.id === sale.purchaseLotId); // Renamed to _purchaseLot
+        // const _purchaseLot = jpyLots.find(lot => lot.id === sale.purchaseLotId); // Removed unused variable
         return {
           id: sale.id,
           type: 'sale' as 'purchase' | 'sale', // Explicit cast
-          currency: 'JPY',
+          currency: 'JPY' as 'USD' | 'JPY', // Explicit cast
           date: sale.saleDate,
           rate: sale.salePrice,
           quantity: sale.quantity,
