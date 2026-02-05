@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Modal, Button, Form, Table } from 'react-bootstrap';
-import type { PurchaseLot, SaleRecord } from '../types/definitions';
+import type { PurchaseLot, SaleRecord, Currency } from '../types/definitions'; // Import Currency
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -11,6 +11,7 @@ export interface SaleData {
   salePrice: number;
   quantity: number;
   purchaseLotId: string;
+  currency: Currency; // Added this line
   fee: number; // New field for fee
 }
 
@@ -105,6 +106,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
       salePrice: saleRateToStore,
       quantity: numQuantity,
       purchaseLotId: selectedLotId,
+      currency: currencyCode, // Added this line
       fee: numFee, // Include fee
     });
   };
