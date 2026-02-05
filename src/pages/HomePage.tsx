@@ -1,8 +1,8 @@
 import { useTheme } from '../contexts/ThemeContext';
 import { useLocalStorage } from '../hooks/useLocalStorage';
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
-import { Card, ListGroup, Badge, Row, Col, Dropdown } from 'react-bootstrap'; // Import Button
+import { Card, ListGroup, Badge, Row, Col, Dropdown, Form } from 'react-bootstrap'; // Import Form
 
 // Chart imports
 import {
@@ -30,10 +30,17 @@ ChartJS.register(
 
 const HomePage = () => {
   const { theme } = useTheme();
+  const [initialKrw, setInitialKrw] = useLocalStorage<number>('initialKrw', 0);
+  const [krwInput, setKrwInput] = useState(initialKrw.toString());
+
   const [usdLots] = useLocalStorage<PurchaseLot[]>('usdLots', []);
   const [usdSales] = useLocalStorage<SaleRecord[]>('usdSales', []);
   const [jpyLots] = useLocalStorage<PurchaseLot[]>('jpyLots', []);
   const [jpySales] = useLocalStorage<SaleRecord[]>('jpySales', []);
+
+  useEffect(() => {
+    setKrwInput(initialKrw.toString());
+  }, [initialKrw]);
 
   const calculateSummary = (lots: PurchaseLot[], sales: SaleRecord[]) => {
     const holdings = lots.filter(lot => lot.remainingQuantity > 0);
@@ -58,11 +65,28 @@ const HomePage = () => {
   const usdSummary = calculateSummary(usdLots, usdSales);
   const jpySummary = calculateSummary(jpyLots, jpySales);
 
+  const totalKrwInvested = usdLots.reduce((sum, lot) => sum + (lot.purchasePrice * lot.initialQuantity), 0) + jpyLots.reduce((sum, lot) => sum + (lot.purchasePrice * lot.initialQuantity), 0);
+  const remainingKrw = initialKrw - totalKrwInvested;
+
   const grandTotalRealizedProfit = usdSummary.totalRealizedProfit + jpySummary.totalRealizedProfit;
 
   const formatKrw = (amount: number) => {
     return `${amount >= 0 ? '' : '-'}${Math.abs(amount).toLocaleString(undefined, { maximumFractionDigits: 0 })} KRW`;
   }
+
+  const handleKrwInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setKrwInput(e.target.value);
+  };
+
+  const handleKrwInputBlur = () => {
+    const value = parseFloat(krwInput);
+    if (!isNaN(value)) {
+      setInitialKrw(value);
+    } else {
+      setInitialKrw(0);
+      setKrwInput('0');
+    }
+  };
 
   // --- Chart Data Preparation ---
   const getCumulativeSalesData = (sales: SaleRecord[]) => {
@@ -157,6 +181,7 @@ const HomePage = () => {
 
   const handleExportData = () => {
     const dataToExport = {
+      initialKrw: JSON.parse(localStorage.getItem('initialKrw') || '0'),
       usdLots: JSON.parse(localStorage.getItem('usdLots') || '[]'),
       usdSales: JSON.parse(localStorage.getItem('usdSales') || '[]'),
       jpyLots: JSON.parse(localStorage.getItem('jpyLots') || '[]'),
@@ -188,6 +213,9 @@ const HomePage = () => {
         // Basic validation
         if (importedData.usdLots && importedData.usdSales && importedData.jpyLots && importedData.jpySales) {
           if (window.confirm('데이터를 가져오면 현재 모든 기록이 덮어씌워집니다. 계속하시겠습니까?')) {
+            if (importedData.initialKrw) {
+              localStorage.setItem('initialKrw', JSON.stringify(importedData.initialKrw));
+            }
             localStorage.setItem('usdLots', JSON.stringify(importedData.usdLots));
             localStorage.setItem('usdSales', JSON.stringify(importedData.usdSales));
             localStorage.setItem('jpyLots', JSON.stringify(importedData.jpyLots));
@@ -218,6 +246,7 @@ const HomePage = () => {
       localStorage.removeItem('jpyLots');
       localStorage.removeItem('jpySales');
       localStorage.removeItem('theme'); // Also reset theme
+      localStorage.removeItem('initialKrw');
       alert('모든 데이터가 삭제되었습니다. 앱을 새로고침합니다.');
       window.location.reload(); // Reload page to reflect changes
     }
@@ -252,6 +281,38 @@ const HomePage = () => {
           />
         </Col>
       </Row>
+
+      <Card className="mb-4">
+        <Card.Header>
+          <h4>원화 (KRW) 자산 현황</h4>
+        </Card.Header>
+        <Card.Body>
+          <Form>
+            <Form.Group as={Row} className="mb-3" controlId="initialKrw">
+              <Form.Label column sm="4">
+                초기 투자 원금 (KRW)
+              </Form.Label>
+              <Col sm="8">
+                <Form.Control
+                  type="number"
+                  value={krwInput}
+                  onChange={handleKrwInputChange}
+                  onBlur={handleKrwInputBlur}
+                  placeholder="초기 투자 원금을 입력하세요"
+                />
+              </Col>
+            </Form.Group>
+          </Form>
+          <ListGroup variant="flush">
+            <ListGroup.Item>
+              외화 매수에 사용된 총액: <strong>{formatKrw(totalKrwInvested)}</strong>
+            </ListGroup.Item>
+            <ListGroup.Item>
+              남은 원화: <strong className={remainingKrw >= 0 ? 'text-success' : 'text-danger'}>{formatKrw(remainingKrw)}</strong>
+            </ListGroup.Item>
+          </ListGroup>
+        </Card.Body>
+      </Card>
 
       <Card className="mb-4 text-center">
         <Card.Header>

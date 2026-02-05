@@ -29,17 +29,21 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
   });
 
   const [calculationMode, setCalculationMode] = useState<'quantity' | 'krw'>('quantity'); // 'quantity' means input quantity, calculate KRW; 'krw' means input KRW, calculate quantity
+  const isJpy = currencyCode === 'JPY';
 
   // Effect to pre-fill form when editingRecord changes
   useEffect(() => {
     if (show && editingRecord) {
-      const calculatedTotalKrw = Number(editingRecord.purchasePrice) * Number(editingRecord.initialQuantity);
+      const isJpyEdit = editingRecord.currency === 'JPY';
+      const displayPrice = isJpyEdit ? editingRecord.purchasePrice * 100 : editingRecord.purchasePrice;
+      const calculatedTotalKrw = Math.round(editingRecord.purchasePrice * editingRecord.initialQuantity);
+
       setFormData({
         currency: editingRecord.currency,
         purchaseDate: editingRecord.purchaseDate,
-        purchasePrice: String(editingRecord.purchasePrice),
+        purchasePrice: String(displayPrice),
         initialQuantity: String(editingRecord.initialQuantity),
-        totalKrwAmount: String(calculatedTotalKrw), // Calculate and set
+        totalKrwAmount: String(calculatedTotalKrw),
         memo: editingRecord.memo || '',
         fee: String(editingRecord.fee || 0),
       });
@@ -57,38 +61,38 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
     setCalculationMode('quantity'); // Reset mode when modal opens
   }, [show, editingRecord, currencyCode]);
 
-  // No longer need a separate useEffect for calculatedKrwAmount as it's handled in handleChange
-  // const [calculatedKrwAmount, setCalculatedKrwAmount] = useState(0);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => {
       const newFormData = { ...prev, [name]: value };
 
-      const numPurchasePrice = Number(newFormData.purchasePrice) || 0;
-      let numInitialQuantity = Number(newFormData.initialQuantity) || 0;
-      let numTotalKrwAmount = Number(newFormData.totalKrwAmount) || 0;
+      const displayPrice = Number(newFormData.purchasePrice) || 0;
+      const effectiveRate = isJpy ? displayPrice / 100 : displayPrice;
+      
+      const numInitialQuantity = Number(newFormData.initialQuantity) || 0;
+      const numTotalKrwAmount = Number(newFormData.totalKrwAmount) || 0;
 
       if (name === 'purchasePrice' || name === 'initialQuantity') {
         if (calculationMode === 'quantity') { // User is inputting quantity, calculate KRW
-          newFormData.totalKrwAmount = String(numPurchasePrice * numInitialQuantity);
-        } else { // User is inputting KRW, calculate quantity
-          if (numPurchasePrice > 0) {
-            newFormData.initialQuantity = String(numTotalKrwAmount / numPurchasePrice);
+          newFormData.totalKrwAmount = String(Math.round(effectiveRate * numInitialQuantity));
+        } else { // User is inputting KRW, but changed price or quantity field (less common)
+          if (effectiveRate > 0) {
+            const calculatedQuantity = numTotalKrwAmount / effectiveRate;
+            newFormData.initialQuantity = String(parseFloat(calculatedQuantity.toFixed(2)));
           } else {
             newFormData.initialQuantity = '';
           }
         }
       } else if (name === 'totalKrwAmount') {
         if (calculationMode === 'krw') { // User is inputting KRW, calculate quantity
-          if (numPurchasePrice > 0) {
-            newFormData.initialQuantity = String(numTotalKrwAmount / numPurchasePrice);
+          if (effectiveRate > 0) {
+            const calculatedQuantity = numTotalKrwAmount / effectiveRate;
+            newFormData.initialQuantity = String(parseFloat(calculatedQuantity.toFixed(2)));
           } else {
             newFormData.initialQuantity = '';
           }
-        } else { // This case should not happen if mode is 'quantity' and totalKrwAmount is changed directly
-          // But if it does, recalculate totalKrwAmount based on price and quantity
-          newFormData.totalKrwAmount = String(numPurchasePrice * numInitialQuantity);
+        } else { // User is inputting quantity, but changed KRW field (should be disabled)
+          newFormData.totalKrwAmount = String(Math.round(effectiveRate * numInitialQuantity));
         }
       }
       return newFormData;
@@ -96,11 +100,12 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
   };
 
   const handleSave = () => {
-    const numPurchasePrice = Number(formData.purchasePrice);
+    const displayPrice = Number(formData.purchasePrice);
+    const rateToStore = isJpy ? displayPrice / 100 : displayPrice;
     const numInitialQuantity = Number(formData.initialQuantity);
     const numFee = Number(formData.fee);
 
-    if (numPurchasePrice <= 0 || numInitialQuantity <= 0) {
+    if (displayPrice <= 0 || numInitialQuantity <= 0) {
       alert('환율과 수량은 0보다 커야 합니다.');
       return;
     }
@@ -108,7 +113,7 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
       id: editingRecord?.id,
       ...formData,
       currency: formData.currency as Currency,
-      purchasePrice: numPurchasePrice,
+      purchasePrice: rateToStore,
       initialQuantity: numInitialQuantity,
       fee: numFee,
     });
@@ -156,11 +161,11 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
           </Form.Group>
 
           <Form.Group className="mb-3" controlId="purchasePrice">
-            <Form.Label>환율 (1 {currencyCode} 당 KRW)</Form.Label>
+            <Form.Label>환율 (1{isJpy ? '00' : ''} {currencyCode} 당 KRW)</Form.Label>
             <Form.Control 
               type="number" 
               name="purchasePrice" 
-              placeholder="예: 9.40"
+              placeholder={isJpy ? "예: 930.97" : "예: 1380.50"}
               value={formData.purchasePrice}
               onChange={handleChange}
             />
@@ -203,6 +208,7 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
               type="text" 
               name="memo" 
               placeholder="예: 월급날 환전"
+              value={formData.memo}
               onChange={handleChange}
             />
           </Form.Group>

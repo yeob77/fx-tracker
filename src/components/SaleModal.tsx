@@ -31,12 +31,17 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
   const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
   const [fee, setFee] = useState<string>(''); // Changed to string
 
+  const isJpy = currencyCode === 'JPY';
+
   // Reset form or pre-fill when modal is opened/closed or editingRecord changes
   useEffect(() => {
     if (show) {
       if (editingRecord) {
+        const isJpyEdit = currencyCode === 'JPY'; // Use currencyCode from props for consistency
+        const displaySalePrice = isJpyEdit ? editingRecord.salePrice * 100 : editingRecord.salePrice;
+
         setSaleDate(editingRecord.saleDate);
-        setSalePrice(String(editingRecord.salePrice)); // Convert to string
+        setSalePrice(String(displaySalePrice)); // Convert to string
         setQuantity(String(editingRecord.quantity)); // Convert to string
         setSelectedLotId(editingRecord.purchaseLotId);
         setFee(String(editingRecord.fee || 0)); // Convert to string
@@ -48,21 +53,22 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
         setFee(''); // Reset to empty string
       }
     }
-  }, [show, editingRecord]);
+  }, [show, editingRecord, currencyCode]);
 
   const handleSave = () => {
+    const displaySalePrice = Number(salePrice);
+    const saleRateToStore = isJpy ? displaySalePrice / 100 : displaySalePrice;
+    const numQuantity = Number(quantity);
+    const numFee = Number(fee);
+
     const selectedLot = holdings.find(lot => lot.id === selectedLotId);
 
     if (!selectedLotId || !selectedLot) {
       alert('판매할 매수 묶음을 선택해주세요.');
       return;
     }
-    // Convert string inputs to numbers for validation and saving
-    const numSalePrice = Number(salePrice);
-    const numQuantity = Number(quantity);
-    const numFee = Number(fee);
-
-    if (numSalePrice <= 0 || numQuantity <= 0) {
+    
+    if (displaySalePrice <= 0 || numQuantity <= 0) {
       alert('환율과 수량은 0보다 커야 합니다.');
       return;
     }
@@ -74,7 +80,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
     onSave({
       id: editingRecord?.id, // Pass id if editing
       saleDate,
-      salePrice: numSalePrice,
+      salePrice: saleRateToStore,
       quantity: numQuantity,
       purchaseLotId: selectedLotId,
       fee: numFee, // Include fee
@@ -99,8 +105,8 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
             />
           </Form.Group>
           <Form.Group className="mb-3">
-            <Form.Label>매도 환율 (1 {currencyCode} 당 KRW)</Form.Label>
-            <Form.Control type="number" placeholder="예: 9.55" value={salePrice} onChange={e => setSalePrice(e.target.value)} />
+            <Form.Label>매도 환율 (1{isJpy ? '00' : ''} {currencyCode} 당 KRW)</Form.Label>
+            <Form.Control type="number" placeholder={isJpy ? "예: 930.97" : "예: 1380.50"} value={salePrice} onChange={e => setSalePrice(e.target.value)} />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>매도 수량 ({currencyCode})</Form.Label>
@@ -146,7 +152,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
                     />
                   </td>
                   <td>{lot.purchaseDate}</td>
-                  <td>{lot.purchasePrice.toFixed(2)}</td>
+                  <td>{(isJpy ? lot.purchasePrice * 100 : lot.purchasePrice).toFixed(2)}</td>
                   <td>{lot.remainingQuantity.toLocaleString()} {currencyCode}</td>
                 </tr>
               ))}
