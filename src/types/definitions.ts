@@ -14,6 +14,7 @@ export interface PurchaseLot {
 export interface SaleRecord {
   id: string;
   purchaseLotId: string; // 어떤 매수 묶음을 팔았는지 연결
+  currency: Currency; // Added this line
   saleDate: string; // ISO 8601 format date string
   salePrice: number; // 1단위 통화를 판매한 원화(KRW) 가격
   quantity: number;
