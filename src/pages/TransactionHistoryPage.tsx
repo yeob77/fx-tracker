@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Table, Badge, Form, Row, Col, Collapse } from 'react-bootstrap'; // Removed Button
+import { Table, Badge, Form, Row, Col, Collapse, Button } from 'react-bootstrap'; // Added Button, Collapse
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -206,7 +206,7 @@ const TransactionHistoryPage = () => {
           </Col>
           <Col md={3}>
             <Form.Group controlId="filterEndDate">
-              <Form.Label>종료일</Label>
+              <Form.Label>종료일</Form.Label>
               <DatePicker
                 selected={filterEndDate}
                 onChange={(date: Date | null) => setFilterEndDate(date)}
