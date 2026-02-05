@@ -14,6 +14,7 @@ const NavBar = () => {
           <Nav className="me-auto">
             <Nav.Link as={NavLink} to="/usd">달러 (USD)</Nav.Link>
             <Nav.Link as={NavLink} to="/jpy">엔화 (JPY)</Nav.Link>
+            <Nav.Link as={NavLink} to="/history">거래 내역</Nav.Link> {/* New Nav Link */}
           </Nav>
           <Button variant={theme === 'dark' ? 'outline-light' : 'outline-dark'} onClick={toggleTheme}>
             {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
