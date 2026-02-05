@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Table, Badge, Form, Row, Col } from 'react-bootstrap'; // Removed Button
+import { Table, Badge, Form, Row, Col, Button, Collapse } from 'react-bootstrap'; // Added Button, Collapse
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -25,10 +25,16 @@ const TransactionHistoryPage = () => {
   const [jpyLots] = useLocalStorage<PurchaseLot[]>('jpyLots', []);
   const [jpySales] = useLocalStorage<SaleRecord[]>('jpySales', []);
 
+  console.log('TransactionHistoryPage: usdLots', usdLots);
+  console.log('TransactionHistoryPage: usdSales', usdSales);
+  console.log('TransactionHistoryPage: jpyLots', jpyLots);
+  console.log('TransactionHistoryPage: jpySales', jpySales);
+
   const [filterCurrency, setFilterCurrency] = useState<'all' | 'USD' | 'JPY'>('all');
   const [filterType, setFilterType] = useState<'all' | 'purchase' | 'sale'>('all');
   const [filterStartDate, setFilterStartDate] = useState<Date | null>(null);
   const [filterEndDate, setFilterEndDate] = useState<Date | null>(null);
+  const [openFilters, setOpenFilters] = useState(false); // New state for filter collapse
 
   const [sortColumn, setSortColumn] = useState<keyof Transaction>('date');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -41,8 +47,8 @@ const TransactionHistoryPage = () => {
     const purchases: Transaction[] = [
       ...usdLots.map(lot => ({
         id: lot.id,
-        type: 'purchase' as 'purchase' | 'sale', // Explicit cast
-        currency: 'USD' as 'USD' | 'JPY', // Explicit cast
+        type: 'purchase' as const, // Explicit cast
+        currency: 'USD' as const, // Explicit cast
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
         quantity: lot.initialQuantity,
@@ -52,8 +58,8 @@ const TransactionHistoryPage = () => {
       })),
       ...jpyLots.map(lot => ({
         id: lot.id,
-        type: 'purchase' as 'purchase' | 'sale', // Explicit cast
-        currency: 'JPY' as 'USD' | 'JPY', // Explicit cast
+        type: 'purchase' as const, // Explicit cast
+        currency: 'JPY' as const, // Explicit cast
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
         quantity: lot.initialQuantity,
@@ -68,8 +74,8 @@ const TransactionHistoryPage = () => {
         // const _purchaseLot = usdLots.find(lot => lot.id === sale.purchaseLotId); // Removed unused variable
         return {
           id: sale.id,
-          type: 'sale' as 'purchase' | 'sale', // Explicit cast
-          currency: 'USD' as 'USD' | 'JPY', // Explicit cast
+          type: 'sale' as const, // Explicit cast
+          currency: 'USD' as const, // Explicit cast
           date: sale.saleDate,
           rate: sale.salePrice,
           quantity: sale.quantity,
@@ -82,8 +88,8 @@ const TransactionHistoryPage = () => {
         // const _purchaseLot = jpyLots.find(lot => lot.id === sale.purchaseLotId); // Removed unused variable
         return {
           id: sale.id,
-          type: 'sale' as 'purchase' | 'sale', // Explicit cast
-          currency: 'JPY' as 'USD' | 'JPY', // Explicit cast
+          type: 'sale' as const, // Explicit cast
+          currency: 'JPY' as const, // Explicit cast
           date: sale.saleDate,
           rate: sale.salePrice,
           quantity: sale.quantity,
@@ -94,8 +100,11 @@ const TransactionHistoryPage = () => {
       }),
     ];
 
+    console.log('TransactionHistoryPage: allTransactions (inside useMemo)', [...purchases, ...sales]);
     return [...purchases, ...sales];
   }, [usdLots, usdSales, jpyLots, jpySales]);
+
+  console.log('TransactionHistoryPage: allTransactions (after useMemo)', allTransactions);
 
   const filteredTransactions = useMemo(() => {
     let filtered = allTransactions;
@@ -114,6 +123,7 @@ const TransactionHistoryPage = () => {
       endDateInclusive.setHours(23, 59, 59, 999);
       filtered = filtered.filter(t => new Date(t.date) <= endDateInclusive);
     }
+    console.log('TransactionHistoryPage: filteredTransactions', filtered);
     return filtered;
   }, [allTransactions, filterCurrency, filterType, filterStartDate, filterEndDate]);
 
@@ -131,6 +141,7 @@ const TransactionHistoryPage = () => {
       }
       return 0;
     });
+    console.log('TransactionHistoryPage: sortedTransactions', sortableTransactions);
     return sortableTransactions;
   }, [filteredTransactions, sortColumn, sortDirection]);
 
@@ -147,52 +158,66 @@ const TransactionHistoryPage = () => {
     <div>
       <h2>통합 거래 내역</h2>
 
-      <Row className="mb-3">
-        <Col md={3}>
-          <Form.Group controlId="filterCurrency">
-            <Form.Label>통화</Form.Label>
-            <Form.Select value={filterCurrency} onChange={e => setFilterCurrency(e.target.value as 'all' | 'USD' | 'JPY')}>
-              <option value="all">전체</option>
-              <option value="USD">USD</option>
-              <option value="JPY">JPY</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-        <Col md={3}>
-          <Form.Group controlId="filterType">
-            <Form.Label>유형</Form.Label>
-            <Form.Select value={filterType} onChange={e => setFilterType(e.target.value as 'all' | 'purchase' | 'sale')}>
-              <option value="all">전체</option>
-              <option value="purchase">매수</option>
-              <option value="sale">매도</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-        <Col md={3}>
-          <Form.Group controlId="filterStartDate">
-            <Form.Label>시작일</Form.Label>
-            <DatePicker
-              selected={filterStartDate}
-              onChange={(date: Date | null) => setFilterStartDate(date)}
-              dateFormat="yyyy-MM-dd"
-              className="form-control"
-              isClearable
-            />
-          </Form.Group>
-        </Col>
-        <Col md={3}>
-          <Form.Group controlId="filterEndDate">
-            <Form.Label>종료일</Form.Label>
-            <DatePicker
-              selected={filterEndDate}
-              onChange={(date: Date | null) => setFilterEndDate(date)}
-              dateFormat="yyyy-MM-dd"
-              className="form-control"
-              isClearable
-            />
-          </Form.Group>
-        </Col>
-      </Row>
+      <div className="d-grid gap-2 mb-3">
+        <Button
+          onClick={() => setOpenFilters(!openFilters)}
+          aria-controls="transaction-filters"
+          aria-expanded={openFilters}
+          variant="outline-secondary"
+          className="d-md-none" // Show only on mobile
+        >
+          {openFilters ? '필터 숨기기' : '필터 보기'}
+        </Button>
+      </div>
+
+      <Collapse in={openFilters} className="d-md-block"> {/* Always show on desktop */}
+        <Row className="mb-3">
+          <Col md={3}>
+            <Form.Group controlId="filterCurrency">
+              <Form.Label>통화</Form.Label>
+              <Form.Select value={filterCurrency} onChange={e => setFilterCurrency(e.target.value as 'all' | 'USD' | 'JPY')}>
+                <option value="all">전체</option>
+                <option value="USD">USD</option>
+                <option value="JPY">JPY</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group controlId="filterType">
+              <Form.Label>유형</Form.Label>
+              <Form.Select value={filterType} onChange={e => setFilterType(e.target.value as 'all' | 'purchase' | 'sale')}>
+                <option value="all">전체</option>
+                <option value="purchase">매수</option>
+                <option value="sale">매도</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group controlId="filterStartDate">
+              <Form.Label>시작일</Form.Label>
+              <DatePicker
+                selected={filterStartDate}
+                onChange={(date: Date | null) => setFilterStartDate(date)}
+                dateFormat="yyyy-MM-dd"
+                className="form-control"
+                isClearable
+              />
+            </Form.Group>
+          </Col>
+          <Col md={3}>
+            <Form.Group controlId="filterEndDate">
+              <Form.Label>종료일</Form.Label>
+              <DatePicker
+                selected={filterEndDate}
+                onChange={(date: Date | null) => setFilterEndDate(date)}
+                dateFormat="yyyy-MM-dd"
+                className="form-control"
+                isClearable
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+      </Collapse>
 
       {sortedTransactions.length === 0 ? (
         <p>거래 내역이 없습니다.</p>
