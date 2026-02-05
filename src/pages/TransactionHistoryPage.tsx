@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Table, Badge, Form, Row, Col, Button, Collapse } from 'react-bootstrap'; // Added Button, Collapse
+import { Table, Badge, Form, Row, Col, Collapse } from 'react-bootstrap'; // Removed Button
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { useLocalStorage } from '../hooks/useLocalStorage';
@@ -45,10 +45,10 @@ const TransactionHistoryPage = () => {
 
   const allTransactions: Transaction[] = useMemo(() => {
     const purchases: Transaction[] = [
-      ...usdLots.map(lot => ({
+      ...usdLots.map((lot): Transaction => ({ // Explicitly type the returned object
         id: lot.id,
-        type: 'purchase' as const, // Explicit cast
-        currency: 'USD' as const, // Explicit cast
+        type: 'purchase',
+        currency: lot.currency, // lot.currency is already 'USD' | 'JPY'
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
         quantity: lot.initialQuantity,
@@ -56,10 +56,10 @@ const TransactionHistoryPage = () => {
         fee: lot.fee || 0,
         memo: lot.memo,
       })),
-      ...jpyLots.map(lot => ({
+      ...jpyLots.map((lot): Transaction => ({ // Explicitly type the returned object
         id: lot.id,
-        type: 'purchase' as const, // Explicit cast
-        currency: 'JPY' as const, // Explicit cast
+        type: 'purchase',
+        currency: lot.currency, // lot.currency is already 'USD' | 'JPY'
         date: lot.purchaseDate,
         rate: lot.purchasePrice,
         quantity: lot.initialQuantity,
@@ -70,12 +70,12 @@ const TransactionHistoryPage = () => {
     ];
 
     const sales: Transaction[] = [
-      ...usdSales.map(sale => {
+      ...usdSales.map((sale): Transaction => { // Explicitly type the returned object
         // const _purchaseLot = usdLots.find(lot => lot.id === sale.purchaseLotId); // Removed unused variable
         return {
           id: sale.id,
-          type: 'sale' as const, // Explicit cast
-          currency: 'USD' as const, // Explicit cast
+          type: 'sale',
+          currency: sale.currency, // sale.currency is already 'USD' | 'JPY'
           date: sale.saleDate,
           rate: sale.salePrice,
           quantity: sale.quantity,
@@ -84,12 +84,12 @@ const TransactionHistoryPage = () => {
           realizedProfit: sale.realizedProfit,
         };
       }),
-      ...jpySales.map(sale => {
+      ...jpySales.map((sale): Transaction => { // Explicitly type the returned object
         // const _purchaseLot = jpyLots.find(lot => lot.id === sale.purchaseLotId); // Removed unused variable
         return {
           id: sale.id,
-          type: 'sale' as const, // Explicit cast
-          currency: 'JPY' as const, // Explicit cast
+          type: 'sale',
+          currency: sale.currency, // sale.currency is already 'USD' | 'JPY'
           date: sale.saleDate,
           rate: sale.salePrice,
           quantity: sale.quantity,
@@ -206,7 +206,7 @@ const TransactionHistoryPage = () => {
           </Col>
           <Col md={3}>
             <Form.Group controlId="filterEndDate">
-              <Form.Label>종료일</Form.Label>
+              <Form.Label>종료일</Label>
               <DatePicker
                 selected={filterEndDate}
                 onChange={(date: Date | null) => setFilterEndDate(date)}
