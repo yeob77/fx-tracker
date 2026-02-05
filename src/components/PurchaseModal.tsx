@@ -17,6 +17,13 @@ interface PurchaseModalProps {
   editingRecord: PurchaseLot | null; // New prop for editing
 }
 
+const formatNumberForInput = (value: number | string): string => {
+  if (value === '' || value === null || value === undefined) return '';
+  const num = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+  if (isNaN(num)) return '';
+  return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
+};
+
 const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, editingRecord }: PurchaseModalProps) => {
   const [formData, setFormData] = useState({
     currency: currencyCode,
@@ -43,9 +50,9 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
         purchaseDate: editingRecord.purchaseDate,
         purchasePrice: String(displayPrice),
         initialQuantity: String(editingRecord.initialQuantity),
-        totalKrwAmount: String(calculatedTotalKrw),
+        totalKrwAmount: formatNumberForInput(calculatedTotalKrw), // Formatted
         memo: editingRecord.memo || '',
-        fee: String(editingRecord.fee || 0),
+        fee: formatNumberForInput(editingRecord.fee || 0), // Formatted
       });
     } else if (show && !editingRecord) {
       setFormData({
@@ -64,13 +71,20 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => {
-      const newFormData = { ...prev, [name]: value };
+      const newFormData = { ...prev };
+      
+      // Remove commas for KRW fields before storing in state
+      if (name === 'totalKrwAmount' || name === 'fee') {
+        newFormData[name as keyof typeof newFormData] = value.replace(/,/g, '');
+      } else {
+        newFormData[name as keyof typeof newFormData] = value;
+      }
 
       const displayPrice = Number(newFormData.purchasePrice) || 0;
       const effectiveRate = isJpy ? displayPrice / 100 : displayPrice;
       
-      const numInitialQuantity = Number(newFormData.initialQuantity) || 0;
-      const numTotalKrwAmount = Number(newFormData.totalKrwAmount) || 0;
+      let numInitialQuantity = Number(newFormData.initialQuantity) || 0;
+      let numTotalKrwAmount = Number(newFormData.totalKrwAmount) || 0;
 
       if (name === 'purchasePrice' || name === 'initialQuantity') {
         if (calculationMode === 'quantity') { // User is inputting quantity, calculate KRW
@@ -99,11 +113,22 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
     });
   };
 
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    // Only re-format KRW fields on blur
+    if (name === 'totalKrwAmount' || name === 'fee') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: formatNumberForInput(value),
+      }));
+    }
+  };
+
   const handleSave = () => {
     const displayPrice = Number(formData.purchasePrice);
     const rateToStore = isJpy ? displayPrice / 100 : displayPrice;
     const numInitialQuantity = Number(formData.initialQuantity);
-    const numFee = Number(formData.fee);
+    const numFee = Number(formData.fee.replace(/,/g, '')); // Remove commas for saving
 
     if (displayPrice <= 0 || numInitialQuantity <= 0) {
       alert('환율과 수량은 0보다 커야 합니다.');
@@ -163,7 +188,7 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
           <Form.Group className="mb-3" controlId="purchasePrice">
             <Form.Label>환율 (1{isJpy ? '00' : ''} {currencyCode} 당 KRW)</Form.Label>
             <Form.Control 
-              type="number" 
+              type="number" // Reverted to number
               name="purchasePrice" 
               placeholder={isJpy ? "예: 930.97" : "예: 1380.50"}
               value={formData.purchasePrice}
@@ -173,7 +198,7 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
           <Form.Group className="mb-3" controlId="initialQuantity">
             <Form.Label>수량 ({currencyCode})</Form.Label>
             <Form.Control 
-              type="number" 
+              type="number" // Reverted to number
               name="initialQuantity" 
               placeholder="예: 10000"
               value={formData.initialQuantity}
@@ -184,22 +209,24 @@ const PurchaseModal = ({ show, handleClose, onSave, currencyName, currencyCode, 
           <Form.Group className="mb-3">
             <Form.Label>총 한화 금액 (자동 계산)</Form.Label>
             <Form.Control
-              type="number" // Changed to number for direct input
+              type="text" // Changed to text
               name="totalKrwAmount"
               placeholder="자동 계산"
-              value={formData.totalKrwAmount}
+              value={formatNumberForInput(formData.totalKrwAmount)} // Formatted
               onChange={handleChange}
+              onBlur={handleBlur}
               disabled={calculationMode === 'quantity'} // Disable if calculating KRW
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="fee">
             <Form.Label>수수료 (KRW, 선택)</Form.Label>
             <Form.Control 
-              type="number" 
+              type="text" // Changed to text
               name="fee" 
               placeholder="예: 5000"
-              value={formData.fee}
+              value={formatNumberForInput(formData.fee)} // Formatted
               onChange={handleChange}
+              onBlur={handleBlur}
             />
           </Form.Group>
           <Form.Group className="mb-3" controlId="memo">

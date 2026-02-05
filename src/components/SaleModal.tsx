@@ -24,6 +24,13 @@ interface SaleModalProps {
   editingRecord: SaleRecord | null; // New prop for editing
 }
 
+const formatNumberForInput = (value: number | string): string => {
+  if (value === '' || value === null || value === undefined) return '';
+  const num = typeof value === 'string' ? parseFloat(value.replace(/,/g, '')) : value;
+  if (isNaN(num)) return '';
+  return num.toLocaleString(undefined, { maximumFractionDigits: 0 });
+};
+
 const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currencyCode, editingRecord }: SaleModalProps) => {
   const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]);
   const [salePrice, setSalePrice] = useState<string>(''); // Changed to string
@@ -44,7 +51,7 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
         setSalePrice(String(displaySalePrice)); // Convert to string
         setQuantity(String(editingRecord.quantity)); // Convert to string
         setSelectedLotId(editingRecord.purchaseLotId);
-        setFee(String(editingRecord.fee || 0)); // Convert to string
+        setFee(formatNumberForInput(editingRecord.fee || 0)); // Format for display
       } else {
         setSaleDate(new Date().toISOString().split('T')[0]);
         setSalePrice(''); // Reset to empty string
@@ -55,11 +62,26 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
     }
   }, [show, editingRecord, currencyCode]);
 
+  const handleSalePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSalePrice(e.target.value);
+  };
+
+  const handleFeeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFee(e.target.value.replace(/,/g, ''));
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    if (name === 'fee') {
+      setFee(formatNumberForInput(value));
+    }
+  };
+
   const handleSave = () => {
     const displaySalePrice = Number(salePrice);
     const saleRateToStore = isJpy ? displaySalePrice / 100 : displaySalePrice;
     const numQuantity = Number(quantity);
-    const numFee = Number(fee);
+    const numFee = Number(fee.replace(/,/g, ''));
 
     const selectedLot = holdings.find(lot => lot.id === selectedLotId);
 
@@ -99,26 +121,40 @@ const SaleModal = ({ show, handleClose, onSave, holdings, currencyName, currency
             <Form.Label>매도일</Form.Label>
             <DatePicker
               selected={new Date(saleDate)} // Convert string to Date object
-              onChange={(date: Date | null) => date && setSaleDate(date.toISOString().split('T')[0])}
+              onChange={(date: Date | null) => date && setSaleDate(prev => date.toISOString().split('T')[0])}
               dateFormat="yyyy-MM-dd"
               className="form-control" // Apply Bootstrap styling
             />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>매도 환율 (1{isJpy ? '00' : ''} {currencyCode} 당 KRW)</Form.Label>
-            <Form.Control type="number" placeholder={isJpy ? "예: 930.97" : "예: 1380.50"} value={salePrice} onChange={e => setSalePrice(e.target.value)} />
+            <Form.Control 
+              type="number" // Reverted to number
+              name="salePrice" 
+              placeholder={isJpy ? "예: 930.97" : "예: 1380.50"} 
+              value={salePrice} 
+              onChange={handleSalePriceChange}
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>매도 수량 ({currencyCode})</Form.Label>
-            <Form.Control type="number" placeholder="판매할 수량" value={quantity} onChange={e => setQuantity(e.target.value)} />
+            <Form.Control 
+              type="number" 
+              name="quantity" 
+              placeholder="판매할 수량" 
+              value={quantity} 
+              onChange={e => setQuantity(e.target.value)} 
+            />
           </Form.Group>
           <Form.Group className="mb-3">
             <Form.Label>수수료 (KRW, 선택)</Form.Label>
             <Form.Control 
-              type="number" 
+              type="text" // Changed to text
+              name="fee" 
               placeholder="예: 5000"
-              value={fee}
-              onChange={e => setFee(e.target.value)}
+              value={formatNumberForInput(fee)} // Formatted
+              onChange={handleFeeChange}
+              onBlur={handleBlur}
             />
           </Form.Group>
         </Form>

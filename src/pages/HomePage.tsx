@@ -2,7 +2,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { useRef, useState, useEffect } from 'react';
 import type { PurchaseLot, SaleRecord } from '../types/definitions';
-import { Card, ListGroup, Badge, Row, Col, Dropdown, Form } from 'react-bootstrap'; // Import Form
+import { Card, ListGroup, Badge, Row, Col, Dropdown, Form, Button } from 'react-bootstrap'; // Import Button
 
 // Chart imports
 import {
@@ -32,6 +32,7 @@ const HomePage = () => {
   const { theme } = useTheme();
   const [initialKrw, setInitialKrw] = useLocalStorage<number>('initialKrw', 0);
   const [krwInput, setKrwInput] = useState(initialKrw.toString());
+  const [showInitialKrwInput, setShowInitialKrwInput] = useState(false); // New state for input visibility
 
   const [usdLots] = useLocalStorage<PurchaseLot[]>('usdLots', []);
   const [usdSales] = useLocalStorage<SaleRecord[]>('usdSales', []);
@@ -86,6 +87,7 @@ const HomePage = () => {
       setInitialKrw(0);
       setKrwInput('0');
     }
+    setShowInitialKrwInput(false); // Hide input after blur
   };
 
   // --- Chart Data Preparation ---
@@ -287,23 +289,26 @@ const HomePage = () => {
           <h4>원화 (KRW) 자산 현황</h4>
         </Card.Header>
         <Card.Body>
-          <Form>
-            <Form.Group as={Row} className="mb-3" controlId="initialKrw">
-              <Form.Label column sm="4">
-                초기 투자 원금 (KRW)
-              </Form.Label>
-              <Col sm="8">
-                <Form.Control
-                  type="number"
-                  value={krwInput}
-                  onChange={handleKrwInputChange}
-                  onBlur={handleKrwInputBlur}
-                  placeholder="초기 투자 원금을 입력하세요"
-                />
-              </Col>
-            </Form.Group>
-          </Form>
-          <ListGroup variant="flush">
+          <ListGroup variant="flush" className="mb-3">
+            <ListGroup.Item>
+                초기 투자 원금: <strong>{formatKrw(initialKrw)}</strong>
+                <Button variant="link" size="sm" onClick={() => setShowInitialKrwInput(!showInitialKrwInput)} className="ms-2 p-0 text-decoration-none">
+                    {showInitialKrwInput ? '닫기' : '수정'}
+                </Button>
+            </ListGroup.Item>
+            {showInitialKrwInput && (
+                <Form.Group as={Row} className="mb-3 mt-2" controlId="initialKrwInput">
+                    <Col sm="12">
+                        <Form.Control
+                            type="number"
+                            value={krwInput}
+                            onChange={handleKrwInputChange}
+                            onBlur={handleKrwInputBlur}
+                            placeholder="초기 투자 원금을 입력하세요"
+                        />
+                    </Col>
+                </Form.Group>
+            )}
             <ListGroup.Item>
               외화 매수에 사용된 총액: <strong>{formatKrw(totalKrwInvested)}</strong>
             </ListGroup.Item>
